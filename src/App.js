@@ -63,11 +63,18 @@ const Banner = ({ user, title }) => (
     <Title>{ title || '[loading...]' }</Title>
   </React.Fragment>
 );
-
-const buttonColor = selected => (
-  selected ? 'success' : null
-)
   
+const timeParts = meets => {
+  const [match, days, hh1, mm1, hh2, mm2] = meetsPat.exec(meets) || [];
+  return !match ? {} : {
+    days,
+    hours: {
+      start: hh1 * 60 + mm1 * 1,
+      end: hh2 * 60 + mm2 * 1
+    }
+  };
+};
+
 const addCourseTimes = course => ({
   ...course,
   ...timeParts(course.meets)
@@ -97,7 +104,7 @@ const App = () => {
 return (
     <Container>
       <Banner title={ schedule.title } user={ user } />
-      <CourseList courses={ schedule.courses } user={ user } />
+      <CourseList courses={ schedule.courses } user={ user } db={db}/>
     </Container>
   );
 };

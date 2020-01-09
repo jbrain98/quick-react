@@ -10,39 +10,26 @@ const days = ['M', 'Tu', 'W', 'Th', 'F'];
 const meetsPat = /^ *((?:M|Tu|W|Th|F)+) +(\d\d?):(\d\d) *[ -] *(\d\d?):(\d\d) *$/;
 
 
-// FIREBASE
-const firebaseConfig = {
-    apiKey: "AIzaSyBwbc5ldCBH7eFRVI_wcHG7srB5tHsKHb0",
-    authDomain: "scheduling-app-e0e87.firebaseapp.com",
-    databaseURL: "https://scheduling-app-e0e87.firebaseio.com",
-    projectId: "scheduling-app-e0e87",
-    storageBucket: "scheduling-app-e0e87.appspot.com",
-    messagingSenderId: "526706062330",
-    appId: "1:526706062330:web:179c1d65f280574f566a43"
-  };
-  
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database().ref();
 
 const buttonColor = selected => (
     selected ? 'success' : null
 )
 
-const Course = ({ course, state, user }) => (
+const Course = ({ course, state, user, db }) => (
     <Button color={ buttonColor(state.selected.includes(course)) }
       onClick={ () => state.toggle(course) }
-      onDoubleClick={ user ? () => moveCourse(course) : null }
+      onDoubleClick={ user ? () => moveCourse(course, db) : null }
       disabled={ hasConflict(course, state.selected) }
       >
       { getCourseTerm(course) } CS { getCourseNumber(course) }: { course.title }
     </Button>
 );
 
-const moveCourse = course => {
+const moveCourse = (course, db) => {
     const meets = prompt('Enter new meeting data, in this format:', course.meets);
     if (!meets) return;
     const {days} = timeParts(meets);
-    if (days) saveCourse(course, meets); 
+    if (days) saveCourse(course, meets, db); 
     else moveCourse(course);
 };
 
@@ -69,7 +56,7 @@ const timeParts = meets => {
     };
   };
   
-  const saveCourse = (course, meets) => {
+  const saveCourse = (course, meets, db) => {
     db.child('courses').child(course.id).update({meets})
       .catch(error => alert(error));
   };
